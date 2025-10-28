@@ -11,11 +11,55 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f7f9fc;
+            /* Se elimina el padding del body para que el fondo llegue a los bordes */
+            padding: 0; 
+            min-height: 100vh;
+        }
+
+        /* Contenedor principal para aplicar el padding original */
+        .main-content {
             padding: 20px;
+            position: relative;
+            z-index: 10; /* Asegura que el contenido esté por encima del fondo */
         }
         
-        /* AÑADIDO: Clase para forzar una altura mínima uniforme en las tarjetas de contenido */
-        /* Ajustar este valor (ej. 400px o 450px) si las tarjetas vuelven a cortarse con más texto */
+        /* BLOQUE DE CSS PARA EL FONDO CAÓTICO */
+        /* Se usa el pseudoelemento ::before para el fondo decorativo */
+        body::before {
+            content: '';
+            position: fixed; /* Fija el fondo al viewport */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Permite interactuar con los elementos debajo */
+            z-index: 0; /* Lo mantiene detrás del contenido */
+            overflow: hidden;
+
+            /* Configuración de MÚLTIPLES IMÁGENES de fondo */
+            background-image: url('https://i.imgur.com/jHNEtWW.png'),
+                              url('https://i.imgur.com/jHNEtWW.png'),
+                              url('https://i.imgur.com/jHNEtWW.png'),
+                              url('https://i.imgur.com/jHNEtWW.png'),
+                              url('https://i.imgur.com/jHNEtWW.png');
+            
+            /* Posiciones Aleatorias */
+            background-position: 5% 10%, 90% 80%, 30% 50%, 75% 15%, 50% 95%;
+            
+            /* No repetir */
+            background-repeat: no-repeat;
+            
+            /* Tamaño y Rotación (Combinados en background-size y transform) */
+            /* Para que el efecto sea de un fondo "viejo" o "desordenado", ajustamos el tamaño */
+            background-size: 100px auto, 150px auto, 80px auto, 120px auto, 70px auto;
+            
+            /* AUMENTO DE OPACIDAD Y ROTACIÓN GLOBAL para mayor visibilidad y caos */
+            opacity: 0.8; /* Aumentado a 0.5 para mayor visibilidad */
+            transform: rotate(2deg); /* Rotación ligera de toda la capa */
+            
+        }
+
+        /* Estilos base (Mismos que antes) */
         .min-h-card-content {
             min-height: 250px; 
         }
@@ -26,6 +70,9 @@
             border-left: 5px solid; 
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+            /* Importante: Z-index alto para que esté sobre el fondo */
+            position: relative; 
+            z-index: 5;
         }
         /* Definición de los colores de borde de las tarjetas de contenido */
         /* Para asegurar el intercalado en las 9 tarjetas de contenido */
@@ -64,6 +111,8 @@
         }
         .accordion-item {
              overflow: hidden; 
+             position: relative; /* Asegura que la solapa esté sobre el fondo */
+             z-index: 5;
         }
         .accordion-content {
             max-height: 0;
@@ -89,11 +138,17 @@
         .rotate-180 {
             transform: rotate(180deg);
         }
+
+        /* Rotaciones individuales forzadas para el efecto "caótico" */
+        /* Nota: Se necesitan elementos individuales para rotaciones únicas,
+           pero lo simulamos ligeramente con transformaciones en el cuerpo 
+           o ajustamos la posición del background. */
+        
     </style>
 </head>
 <body>
 
-<div class="container mx-auto p-4 sm:p-8">
+<div class="main-content container mx-auto">
     <header class="text-center mb-8 p-6 rounded-xl bg-danone-blue shadow-2xl">
         <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-2">
             Fundamentos de operaciones y calidad
@@ -321,3 +376,4 @@
 
 </body>
 </html>
+
