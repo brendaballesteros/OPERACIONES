@@ -6,8 +6,7 @@
     <title>Infografía Interactiva Proyecto Margarita</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://kit.fontawesome.com/a7a72d325e.js" crossorigin="anonymous"></script>
-    <!-- 1. Cargar Chart.js para el elemento de Impacto Visual -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <!-- Se elimina la carga de Chart.js ya que el gráfico fue borrado -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         body {
@@ -50,6 +49,34 @@
             opacity: 0.8;
             transform: rotate(2deg);
         }
+
+        /* ESTILOS DE LOS CONTADORES KPI */
+        .kpi-card {
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .kpi-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* ESTILOS PARA EMBEBIDO DE VIDEO RESPONSIVO */
+        .video-responsive {
+            overflow: hidden;
+            padding-bottom: 56.25%; /* Relación de aspecto 16:9 */
+            position: relative;
+            height: 0;
+        }
+        .video-responsive iframe {
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            border-radius: 0.75rem;
+        }
+
 
         /* ESTILOS DEL MODAL (VENTANA EMERGENTE) */
         .modal-backdrop {
@@ -136,6 +163,34 @@
         </div>
     </header>
 
+    <!-- ************************************ -->
+    <!-- CONTADORES ANIMADOS DE IMPACTO -->
+    <!-- ************************************ -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        
+        <!-- KPI 1: Productores Beneficiados -->
+        <div class="kpi-card p-6 rounded-xl text-center border-b-4 border-danone-red">
+            <i class="fas fa-users text-4xl text-danone-red mb-3"></i>
+            <div id="kpi-producers" class="text-5xl font-extrabold text-gray-800" data-target="950" data-suffix="+">0</div>
+            <p class="text-sm font-medium text-gray-500 mt-1">Productores Beneficiados</p>
+        </div>
+
+        <!-- KPI 2: Crecimiento de Ingresos -->
+        <div class="kpi-card p-6 rounded-xl text-center border-b-4 border-danone-blue">
+            <i class="fas fa-chart-line text-4xl text-danone-blue mb-3"></i>
+            <div id="kpi-growth" class="text-5xl font-extrabold text-gray-800" data-target="300" data-suffix="%">0</div>
+            <p class="text-sm font-medium text-gray-500 mt-1">Crecimiento de Ingresos</p>
+        </div>
+
+        <!-- KPI 3: Crédito Movilizado -->
+        <div class="kpi-card p-6 rounded-xl text-center border-b-4 border-danone-red">
+            <i class="fas fa-hand-holding-usd text-4xl text-danone-red mb-3"></i>
+            <div id="kpi-credit" class="text-5xl font-extrabold text-gray-800" data-target="240" data-prefix="$" data-suffix="M">0</div>
+            <p class="text-sm font-medium text-gray-500 mt-1">Crédito Movilizado (MXN)</p>
+        </div>
+
+    </div>
+
     <!-- LAS SOLAPAS AHORA SON BOTONES DE APERTURA DE MODAL -->
     <div class="space-y-8"> 
 
@@ -168,14 +223,25 @@
 
     </div>
 
-    <!-- ELEMENTO DE IMPACTO: GRÁFICO DE BARRAS -->
-    <div class="w-full max-w-xl mx-auto p-4 bg-white rounded-xl shadow-2xl mt-12">
-        <h3 class="text-lg font-semibold text-danone-blue mb-3 text-center">Logros del Proyecto Margarita (Datos Reales)</h3>
-        <canvas id="impactChart"></canvas>
-        <p class="text-xs text-gray-500 mt-2 text-center">
-            Fuente de datos: Comunicados de prensa de Danone (2024-2025).
-        </p>
+    <!-- ************************************ -->
+    <!-- VIDEO TESTIMONIAL REAL -->
+    <!-- ************************************ -->
+    <div class="mt-12 p-6 bg-white rounded-xl shadow-2xl">
+        <h3 class="text-2xl font-bold text-danone-red mb-4 text-center">Testimonio Real del Impacto</h3>
+        <p class="text-gray-600 mb-4 text-center">Mira la historia de Jaime Cortés, productor beneficiado por el Proyecto Margarita, y cómo cambió su vida y la de su familia.</p>
+        <div class="video-responsive">
+            <!-- Video de YouTube del Proyecto Margarita -->
+            <iframe 
+                src="https://www.youtube.com/embed/5wa-PZ2a9GI" 
+                allowfullscreen 
+                frameborder="0"
+                title="Danone Ecosystem - The story of Jaime Cortés - Margarita project, Mexico">
+            </iframe>
+        </div>
     </div>
+
+
+    <!-- SE ELIMINA EL ELEMENTO DE GRÁFICO DE BARRAS -->
 
     <footer class="text-center mt-10 text-gray-500 text-sm p-4 border-t border-gray-300">
         <p>Infografía generada con base en los contenidos de administración de operaciones i.</p>
@@ -325,79 +391,75 @@
 
 
 <script>
-    // Inicialización de Gráfico Chart.js
-    function createImpactChart() {
-        const ctx = document.getElementById('impactChart');
-        if (!ctx) return;
+    // **********************************
+    // 1. INICIALIZACIÓN DE CONTADORES KPI
+    // **********************************
+    // Nueva función de animación con Easing (desaceleración)
+    function animateValue(obj, start, end, duration, prefix = '', suffix = '') {
+        let startTimestamp = null;
+        
+        // Easing function: Cuártica (t^4) - Desaceleración mucho más fuerte al final.
+        const easeOutQuart = t => 1 - Math.pow(1 - t, 4);
 
-        new Chart(ctx, {
-            type: 'bar', // Gráfico de barras
-            data: {
-                labels: ['Productores Beneficiados', 'Crecimiento de Ingresos', 'Crédito Movilizado'],
-                datasets: [{
-                    label: 'Resultados Clave del Proyecto Margarita',
-                    data: [950, 300, 240], 
-                    backgroundColor: ['rgba(0, 90, 156, 0.8)', 'rgba(227, 0, 27, 0.8)', 'rgba(0, 51, 102, 0.8)'],
-                    borderColor: ['rgba(0, 90, 156, 1)', 'rgba(227, 0, 27, 1)', 'rgba(0, 51, 102, 1)'],
-                    borderWidth: 1,
-                    borderRadius: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 1000, 
-                        ticks: { color: '#005A9C', callback: function(value, index, values) { return value; } }
-                    },
-                    x: { ticks: { color: '#005A9C' } }
-                },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                if (context.dataIndex === 0) return 'Productores Beneficiados: >900';
-                                if (context.dataIndex === 1) return 'Aumento en Ingresos: 300% (Triplicado)';
-                                if (context.dataIndex === 2) return 'Crédito Movilizado: $240M MXN';
-                                return '';
-                            }
-                        }
-                    }
-                }
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const elapsed = timestamp - startTimestamp;
+            let progress = Math.min(elapsed / duration, 1);
+            
+            // Aplicar la desaceleración
+            const easedProgress = easeOutQuart(progress); 
+
+            // Calcular el valor actual usando el progreso desacelerado
+            const currentValue = Math.floor(easedProgress * (end - start) + start);
+            
+            obj.innerHTML = prefix + currentValue.toLocaleString('es-MX') + suffix;
+            
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            } else {
+                // Asegurar que el valor final sea exacto
+                obj.innerHTML = prefix + end.toLocaleString('es-MX') + suffix;
             }
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    function setupKpiCounters() {
+        document.querySelectorAll('.kpi-card div[data-target]').forEach(counter => {
+            const target = parseInt(counter.getAttribute('data-target'));
+            const prefix = counter.getAttribute('data-prefix') || '';
+            const suffix = counter.getAttribute('data-suffix') || '';
+            animateValue(counter, 0, target, 4000, prefix, suffix); // 4 segundos de animación para un mejor efecto
         });
     }
 
-    // LÓGICA DE MODAL
+
+    // **********************************
+    // 2. INICIALIZACIÓN DE MODAL
+    // **********************************
     const modal = document.getElementById('main-modal');
     const modalTitle = document.getElementById('modal-title');
     const modalBody = document.getElementById('modal-body');
     const openButtons = document.querySelectorAll('.open-modal');
     const closeButton = document.getElementById('close-modal');
 
-    // Función para abrir el modal
     function openModal(modalId, title) {
         const template = document.getElementById(modalId);
         if (template) {
-            // Limpiar contenido anterior
             modalBody.innerHTML = '';
-            
-            // Clonar el contenido de la plantilla y agregarlo al cuerpo del modal
             const content = template.content.cloneNode(true);
             modalBody.appendChild(content);
 
             modalTitle.textContent = title;
             modal.style.display = 'flex'; // Mostrar el modal
+            document.body.style.overflow = 'hidden'; // Evita el desplazamiento del fondo
         }
     }
 
-    // Función para cerrar el modal
     function closeModal() {
         modal.style.display = 'none';
-        modalBody.innerHTML = ''; // Limpiar el contenido al cerrar
+        modalBody.innerHTML = ''; 
+        document.body.style.overflow = ''; // Habilita el desplazamiento del fondo
     }
 
     // Event Listeners
@@ -411,23 +473,24 @@
 
     closeButton.addEventListener('click', closeModal);
 
-    // Cerrar modal al hacer clic fuera de él (en el fondo oscuro)
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             closeModal();
         }
     });
 
-    // Cerrar modal con la tecla ESC
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && modal.style.display === 'flex') {
             closeModal();
         }
     });
 
-    // Inicialización
+    // **********************************
+    // 3. INICIALIZACIÓN FINAL
+    // **********************************
     document.addEventListener('DOMContentLoaded', () => {
-        createImpactChart();
+        setupKpiCounters(); // Inicia la animación de los contadores con Easing
+        // Se elimina la llamada a createImpactChart()
     });
 </script>
 
